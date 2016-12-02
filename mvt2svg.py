@@ -7,7 +7,6 @@ import mapbox_vector_tile
 # enum34==1.1.4
 from enum import Enum
 # https://github.com/mapbox/vector-tile-py
-from vector_tile import renderer
 import mercantile
 import math
 from django.contrib.gis.geos import LineString, Polygon
@@ -59,6 +58,7 @@ def recommended_tile_xyz(line_string, zoom):
     From a line_string and a zoom,
     returns the tile containing a given point.
     """
+    from vector_tile import renderer
     assert(line_string.srid == SRID_SPHERICAL_MERCATOR)
     # mercantile.tile(*mercantile.ul(486, 332, 10) + (10,))
     # mercantile.tile(lng, lat, zoom)
