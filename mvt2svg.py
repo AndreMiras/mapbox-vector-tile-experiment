@@ -1,6 +1,7 @@
 """
 Creates a SVG tile image from a Mapbox Vector Tile.
 """
+from __future__ import print_function
 import argparse
 import svgwrite
 import mapbox_vector_tile
@@ -64,7 +65,7 @@ def recommended_tile_xyz(line_string, zoom):
     # mercantile.tile(lng, lat, zoom)
     lng, lat = renderer.merc2lonlat(line_string[0][0], line_string[0][1])
     xtile, ytile = deg2num(lat, lng, zoom)
-    print "recommended_tile_xyz:", (xtile, ytile, zoom)
+    print("recommended_tile_xyz:", (xtile, ytile, zoom))
     return (xtile, ytile)
 
 
@@ -139,7 +140,7 @@ def process_linestring(tile_xyz, lnglat_line):
     # recommended_tile_xyz(lnglat_line, zoom)
     xy_pairs = mercator2tile(tile_bounds, lnglat_line)
     if not in_extent(xy_pairs):
-        print "Not in extent"
+        print("Not in extent")
         return
     clipping(xy_pairs)
     shrink(xy_pairs)
@@ -151,12 +152,11 @@ def process_feature(tile_xyz, feature):
     geometry = feature['geometry']
     geometry_type_id = feature['type']
     geometry_type = GeometryType(geometry_type_id)
-    # print "geometry_type:", geometry_type
     if geometry_type == GeometryType.LINESTRING:
         lnglat_line = LineString(geometry, srid=SRID_SPHERICAL_MERCATOR)
         process_linestring(tile_xyz, lnglat_line)
     else:
-        print "Not a LINESTRING"
+        print("Not a LINESTRING")
 
 
 def process_features(tile_xyz, features):
@@ -210,7 +210,7 @@ def main():
     tile_xyz = (args.tilex, args.tiley, args.zoom)
     layers_dict = decode_pbf(mvt_file_path)
     process_features(tile_xyz, layers_dict['road']['features'])
-    print "Image generated in: %s" % (SVG_IMAGE_PATH)
+    print("Image generated in: %s" % (SVG_IMAGE_PATH))
 
 
 if __name__ == "__main__":
