@@ -12,7 +12,8 @@ SRID_LNGLAT = 4326
 SRID_SPHERICAL_MERCATOR = 3857
 # `mapbox-vector-tile` has a hardcoded tile extent of 4096 units.
 MVT_EXTENT = 4096
-dwg = svgwrite.Drawing('test.svg', profile='tiny')
+SVG_IMAGE_PATH = 'test.svg'
+dwg = svgwrite.Drawing(SVG_IMAGE_PATH, profile='tiny')
 
 
 class GeometryType(Enum):
@@ -209,6 +210,7 @@ def main():
     tile_xyz = (args.tilex, args.tiley, args.zoom)
     layers_dict = decode_pbf(mvt_file_path)
     process_features(tile_xyz, layers_dict['road']['features'])
+    print "Image generated in: %s" % (SVG_IMAGE_PATH)
 
 
 if __name__ == "__main__":
