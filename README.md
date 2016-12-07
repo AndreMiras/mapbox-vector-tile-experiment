@@ -9,5 +9,3 @@ I've downloaded [6160.mvt](http://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7
 python mvt2svg.py 6160.mvt
 ```
 It will generate a [test.svg](http://imgh.us/test_259.svg) image out from the Mapbox Vector Tile file.
-
-![Screenshot](http://imgh.us/test_259.svg)
