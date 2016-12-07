@@ -32,6 +32,11 @@ class CustomLineElement(LineElement):
 
 
 class GeometryType(Enum):
+    """
+    See:
+    https://github.com/mapbox/vector-tile-spec/tree/master/2.1
+    4.3.4. Geometry Types
+    """
     UNKNOWN = 0
     POINT = 1
     LINESTRING = 2
