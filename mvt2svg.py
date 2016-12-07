@@ -3,13 +3,13 @@ Creates a SVG tile image from a Mapbox Vector Tile.
 """
 from __future__ import print_function
 import argparse
-from svgutils.transform import SVG, SVGFigure, FigureElement, LineElement
-from lxml import etree
+import math
+import mercantile
 import mapbox_vector_tile
 from enum import Enum
-import mercantile
-import math
+from lxml import etree
 from django.contrib.gis.geos import LineString, Polygon
+from svgutils.transform import SVG, SVGFigure, FigureElement, LineElement
 SRID_LNGLAT = 4326
 SRID_SPHERICAL_MERCATOR = 3857
 # `mapbox-vector-tile` has a hardcoded tile extent of 4096 units.
