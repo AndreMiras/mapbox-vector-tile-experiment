@@ -14,7 +14,7 @@ SRID_SPHERICAL_MERCATOR = 3857
 # `mapbox-vector-tile` has a hardcoded tile extent of 4096 units.
 MVT_EXTENT = 4096
 SVG_IMAGE_PATH = 'test.svg'
-dwg = svgwrite.Drawing(SVG_IMAGE_PATH, profile='tiny')
+dwg = svgwrite.Drawing(SVG_IMAGE_PATH, profile='full')
 
 
 class GeometryType(Enum):
@@ -24,14 +24,17 @@ class GeometryType(Enum):
     POLYGON = 3
 
 
-def draw_line(start, end):
+def draw_polyline(points, prop_type):
     """
-    https://pythonhosted.org/svgwrite/classes/shapes.html#line
+    https://pythonhosted.org/svgwrite/classes/shapes.html#polyline
     """
     # the Linestring seems to be a multi-linestring
-    stroke = svgwrite.rgb(200, 10, 16, '%')
-    line = dwg.line(start=start, end=end, stroke=stroke)
-    dwg.add(line)
+    stroke = 'black'
+    if prop_type == 'ferry':
+        stroke = 'blue'
+    style = "fill:none;stroke:%s" % (stroke)
+    polyline = dwg.polyline(points=points, style=style)
+    dwg.add(polyline)
     dwg.save()
 
 
@@ -73,31 +76,10 @@ def shrink(xy_pairs):
     """
     Linear shrinking before drawing
     """
-    ratio = 4
+    ratio = 5
     for xy_pair in xy_pairs:
         xy_pair[0] /= ratio
         xy_pair[1] /= ratio
-
-
-def mercator2tile(tile_bounds, line):
-    """
-    Converts the LineString Mercator coordinates to tile-based coordinates
-    by computing the pixel location within the tile.
-    """
-    # we work with both in Spherical Mercator
-    assert(tile_bounds.srid == SRID_SPHERICAL_MERCATOR)
-    assert(line.srid == SRID_SPHERICAL_MERCATOR)
-    (x0, y0, x_max, y_max) = tile_bounds.extent
-    x_span = x_max - x0
-    y_span = y_max - y0
-
-    def xy_pairs():
-        for x_merc, y_merc in line:
-            yield [
-                int((x_merc - x0) * MVT_EXTENT / x_span),
-                int((y_merc - y0) * MVT_EXTENT / y_span),
-                ]
-    return [p for p in xy_pairs()]
 
 
 def in_extent(pairs):
@@ -125,6 +107,18 @@ def clipping(pairs):
         point[1] = min(point[1], MVT_EXTENT)
 
 
+def convert2pixel(linestring):
+    """
+    Converts x, y to pixels coordinates.
+    """
+    def xy_pairs():
+        for x_merc, y_merc in linestring:
+            x = x_merc
+            y = MVT_EXTENT - y_merc
+            yield [x, y]
+    return [p for p in xy_pairs()]
+
+
 def xyz_tile_mercator_bounds(x, y, zoom):
     """
     Returns XYZ tile Mercator bounds.
@@ -135,34 +129,44 @@ def xyz_tile_mercator_bounds(x, y, zoom):
     return tile_bounds
 
 
-def process_linestring(tile_xyz, lnglat_line):
-    tile_bounds = xyz_tile_mercator_bounds(*tile_xyz)
-    # recommended_tile_xyz(lnglat_line, zoom)
-    xy_pairs = mercator2tile(tile_bounds, lnglat_line)
-    if not in_extent(xy_pairs):
+def process_linestring(linestring, prop_type):
+    xy_pairs = convert2pixel(linestring)
+    if not in_extent(linestring):
         print("Not in extent")
         return
     clipping(xy_pairs)
     shrink(xy_pairs)
-    draw_line(xy_pairs[0], xy_pairs[1])
+    # draw_line(xy_pairs[0], xy_pairs[1], prop_type)
+    draw_polyline(xy_pairs, prop_type)
 
 
-def process_feature(tile_xyz, feature):
-    x, y, zoom = tile_xyz
+def is_multilinestring(geometry):
+    return type(geometry[0][0]) == list
+
+
+def process_feature(feature):
     geometry = feature['geometry']
+    properties = feature['properties']
+    prop_type = properties['type']
     geometry_type_id = feature['type']
     geometry_type = GeometryType(geometry_type_id)
     if geometry_type == GeometryType.LINESTRING:
-        lnglat_line = LineString(geometry, srid=SRID_SPHERICAL_MERCATOR)
-        process_linestring(tile_xyz, lnglat_line)
+        if is_multilinestring(geometry):
+            # MultiLineString processing
+            for subgeometry in geometry:
+                linestring = LineString(subgeometry)
+                process_linestring(linestring, prop_type)
+        else:
+            linestring = LineString(geometry)
+            process_linestring(linestring, prop_type)
     else:
-        print("Not a LINESTRING")
+        print("Not supported geometry type:", geometry_type)
 
 
-def process_features(tile_xyz, features):
+def process_features(features):
     for feature in features:
         # looks like it's in Spherical/Web Mercator (EPSG:3857)
-        process_feature(tile_xyz, feature)
+        process_feature(feature)
 
 
 def decode_pbf(mvt_file_path):
@@ -186,13 +190,7 @@ def argument_parser():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-x", "--tilex", help="Tile x index", type=int, required=True)
-    parser.add_argument(
-        "-y", "--tiley", help="Tile y index", type=int, required=True)
-    parser.add_argument(
-        "-z", "--zoom", help="Tile zoom", type=int, required=True)
-    parser.add_argument(
-        "-f", "--mvt", help="Mapbox Vector Tile file to load", required=True)
+        "mvt_file", help="Mapbox Vector Tile file to load")
     args = parser.parse_args()
     return args
 
@@ -201,15 +199,12 @@ def main():
     """
     Parses args and processes features.
     Usage example:
-    mvt2svg.py -x 164 -y 367 -z 10 -f fixtures/12-1143-1497.vector.pbf
-    mvt2svg.py -x 2047 -y 2047 -z 12 -f fixtures/12-1143-1497.vector.pbf
-    mvt2svg.py -x 8190 -y 8189 -z 14 -f fixtures/12-1143-1497.vector.pbf
+    mvt2svg.py 12-1143-1497.vector.pbf
     """
     args = argument_parser()
-    mvt_file_path = args.mvt
-    tile_xyz = (args.tilex, args.tiley, args.zoom)
+    mvt_file_path = args.mvt_file
     layers_dict = decode_pbf(mvt_file_path)
-    process_features(tile_xyz, layers_dict['road']['features'])
+    process_features(layers_dict['road']['features'])
     print("Image generated in: %s" % (SVG_IMAGE_PATH))
 
 
