@@ -3,7 +3,8 @@ Creates a SVG tile image from a Mapbox Vector Tile.
 """
 from __future__ import print_function
 import argparse
-import svgwrite
+from svgutils.transform import SVG, SVGFigure, FigureElement, LineElement
+from lxml import etree
 import mapbox_vector_tile
 from enum import Enum
 import mercantile
@@ -14,7 +15,22 @@ SRID_SPHERICAL_MERCATOR = 3857
 # `mapbox-vector-tile` has a hardcoded tile extent of 4096 units.
 MVT_EXTENT = 4096
 SVG_IMAGE_PATH = 'test.svg'
-dwg = svgwrite.Drawing(SVG_IMAGE_PATH, profile='full')
+fig = SVGFigure()
+
+
+class CustomLineElement(LineElement):
+    """
+    Inherits from LineElement, gives access to style attribute.
+    """
+    def __init__(self, points, width=1, color='black', style=''):
+        linedata = "M{} {} ".format(*points[0])
+        linedata += " ".join(map(lambda x: "L{} {}".format(*x), points[1:]))
+        line = etree.Element(SVG+"path",
+                             {"d": linedata,
+                              "stroke-width": str(width),
+                              "stroke": color,
+                              "style": style})
+        FigureElement.__init__(self, line)
 
 
 class GeometryType(Enum):
@@ -26,16 +42,15 @@ class GeometryType(Enum):
 
 def draw_polyline(points, prop_type):
     """
-    https://pythonhosted.org/svgwrite/classes/shapes.html#polyline
+    https://github.com/btel/svg_utils
     """
     # the Linestring seems to be a multi-linestring
     stroke = 'black'
     if prop_type == 'ferry':
         stroke = 'blue'
     style = "fill:none;stroke:%s" % (stroke)
-    polyline = dwg.polyline(points=points, style=style)
-    dwg.add(polyline)
-    dwg.save()
+    polyline = CustomLineElement(points, style=style)
+    fig.append(polyline)
 
 
 def deg2num(lat_deg, lon_deg, zoom):
@@ -205,6 +220,7 @@ def main():
     mvt_file_path = args.mvt_file
     layers_dict = decode_pbf(mvt_file_path)
     process_features(layers_dict['road']['features'])
+    fig.save(SVG_IMAGE_PATH)
     print("Image generated in: %s" % (SVG_IMAGE_PATH))
 
 
