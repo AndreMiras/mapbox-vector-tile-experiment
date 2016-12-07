@@ -4,14 +4,11 @@ Creates a SVG tile image from a Mapbox Vector Tile.
 from __future__ import print_function
 import argparse
 import math
-import mercantile
 import mapbox_vector_tile
 from enum import Enum
 from lxml import etree
-from django.contrib.gis.geos import LineString, Polygon
+from django.contrib.gis.geos import LineString
 from svgutils.transform import SVG, SVGFigure, FigureElement, LineElement
-SRID_LNGLAT = 4326
-SRID_SPHERICAL_MERCATOR = 3857
 # `mapbox-vector-tile` has a hardcoded tile extent of 4096 units.
 MVT_EXTENT = 4096
 TILE_SIZE = 256
@@ -72,22 +69,6 @@ def deg2num(lat_deg, lon_deg, zoom):
     return (xtile, ytile)
 
 
-def recommended_tile_xyz(line_string, zoom):
-    """
-    From a line_string and a zoom,
-    returns the tile containing a given point.
-    """
-    # https://github.com/mapbox/vector-tile-py
-    from vector_tile import renderer
-    assert(line_string.srid == SRID_SPHERICAL_MERCATOR)
-    # mercantile.tile(*mercantile.ul(486, 332, 10) + (10,))
-    # mercantile.tile(lng, lat, zoom)
-    lng, lat = renderer.merc2lonlat(line_string[0][0], line_string[0][1])
-    xtile, ytile = deg2num(lat, lng, zoom)
-    print("recommended_tile_xyz:", (xtile, ytile, zoom))
-    return (xtile, ytile)
-
-
 def shrink(xy_pairs):
     """
     Linear shrinking before drawing
@@ -133,16 +114,6 @@ def convert2pixel(linestring):
             y = MVT_EXTENT - y_merc
             yield [x, y]
     return [p for p in xy_pairs()]
-
-
-def xyz_tile_mercator_bounds(x, y, zoom):
-    """
-    Returns XYZ tile Mercator bounds.
-    """
-    tile_bounds = Polygon.from_bbox(mercantile.bounds(x, y, zoom))
-    tile_bounds.srid = SRID_LNGLAT
-    tile_bounds.transform(SRID_SPHERICAL_MERCATOR)
-    return tile_bounds
 
 
 def process_linestring(linestring, prop_type):
