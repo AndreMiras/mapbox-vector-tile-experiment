@@ -14,6 +14,7 @@ SRID_LNGLAT = 4326
 SRID_SPHERICAL_MERCATOR = 3857
 # `mapbox-vector-tile` has a hardcoded tile extent of 4096 units.
 MVT_EXTENT = 4096
+TILE_SIZE = 256
 SVG_IMAGE_PATH = 'test.svg'
 fig = SVGFigure()
 
@@ -91,7 +92,7 @@ def shrink(xy_pairs):
     """
     Linear shrinking before drawing
     """
-    ratio = 5
+    ratio = (MVT_EXTENT / TILE_SIZE)
     for xy_pair in xy_pairs:
         xy_pair[0] /= ratio
         xy_pair[1] /= ratio
