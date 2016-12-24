@@ -7,7 +7,7 @@ import math
 import mapbox_vector_tile
 from enum import Enum
 from lxml import etree
-from django.contrib.gis.geos import LineString
+from django.contrib.gis.geos import LineString, Polygon
 from svgutils.transform import SVG, SVGFigure, FigureElement, LineElement
 # `mapbox-vector-tile` has a hardcoded tile extent of 4096 units.
 MVT_EXTENT = 4096
@@ -132,14 +132,23 @@ def process_linestring(linestring, prop_type):
     draw_polyline(xy_pairs, prop_type)
 
 
+def process_polygon(polygon, prop_type):
+    linestring = polygon[0]
+    process_linestring(linestring)
+
+
 def is_multilinestring(geometry):
     return type(geometry[0][0]) == list
 
 
-def process_feature(feature):
+def process_feature(layer_type, feature):
     geometry = feature['geometry']
     properties = feature['properties']
-    prop_type = properties['type']
+    prop_type = layer_type
+    try:
+        prop_type = properties['type']
+    except KeyError:
+        pass
     geometry_type_id = feature['type']
     geometry_type = GeometryType(geometry_type_id)
     if geometry_type == GeometryType.LINESTRING:
@@ -151,14 +160,19 @@ def process_feature(feature):
         else:
             linestring = LineString(geometry)
             process_linestring(linestring, prop_type)
+    elif geometry_type == GeometryType.POLYGON:
+        for subgeometry in geometry:
+            polygon = Polygon(subgeometry)
+            process_polygon(polygon, prop_type)
     else:
         print("Not supported geometry type:", geometry_type)
+        pass
 
 
-def process_features(features):
+def process_features(layer_key, features):
     for feature in features:
         # looks like it's in Spherical/Web Mercator (EPSG:3857)
-        process_feature(feature)
+        process_feature(layer_key, feature)
 
 
 def decode_pbf(mvt_file_path):
@@ -187,6 +201,16 @@ def argument_parser():
     return args
 
 
+def process_layer(layer_key, layer_value):
+    features = layer_value['features']
+    process_features(layer_key, features)
+
+
+def process_layers(layers_dict):
+    for layer_key, layer_value in layers_dict.iteritems():
+        process_layer(layer_key, layer_value)
+
+
 def main():
     """
     Parses args and processes features.
@@ -196,7 +220,7 @@ def main():
     args = argument_parser()
     mvt_file_path = args.mvt_file
     layers_dict = decode_pbf(mvt_file_path)
-    process_features(layers_dict['road']['features'])
+    process_layers(layers_dict)
     fig.save(SVG_IMAGE_PATH)
     print("Image generated in: %s" % (SVG_IMAGE_PATH))
 
