@@ -9,3 +9,20 @@ I've downloaded [6160.mvt](http://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7
 python mvt2svg.py 6160.mvt
 ```
 It will generate a [test.svg](http://imgh.us/test_259.svg) image out from the Mapbox Vector Tile file.
+
+
+## Troubleshooting
+### libgeos_c.so
+```
+OSError: Could not find lib geos_c or load any of its variants ['libgeos_c.so.1', 'libgeos_c.so'].
+```
+This is required by `mapbox_vector_tile` module, install it:
+
+Ubuntu
+```
+apt install libgeos-c1
+```
+Gentoo
+```
+emerge sci-libs/geos
+```
