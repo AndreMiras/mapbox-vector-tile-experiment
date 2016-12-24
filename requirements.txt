@@ -2,3 +2,4 @@ svgutils==0.2.0
 mapbox-vector-tile==0.5.0
 enum34==1.1.6
 Django==1.8.17
+lxml==3.7.1
