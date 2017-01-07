@@ -13,7 +13,7 @@ from svgutils.transform import SVG, SVGFigure, FigureElement, LineElement
 MVT_EXTENT = 4096
 TILE_SIZE = 256
 SVG_IMAGE_PATH = 'test.svg'
-fig = SVGFigure()
+fig = SVGFigure(width=TILE_SIZE, height=TILE_SIZE)
 
 
 class CustomLineElement(LineElement):
