@@ -134,7 +134,7 @@ def process_linestring(linestring, prop_type):
 
 def process_polygon(polygon, prop_type):
     linestring = polygon[0]
-    process_linestring(linestring)
+    process_linestring(linestring, prop_type)
 
 
 def is_multilinestring(geometry):
