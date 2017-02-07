@@ -44,7 +44,7 @@ def main():
          "zoom_level=? AND tile_column=? AND tile_row=?"),
         (zoom, tile_x, tile_y))
     one = c.fetchone()
-    print(one[0])
+    print(one[0], end='')
 
 
 if __name__ == "__main__":
