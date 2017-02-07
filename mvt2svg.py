@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Creates a SVG tile image from a Mapbox Vector Tile.
 """
