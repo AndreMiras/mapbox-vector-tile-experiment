@@ -186,18 +186,15 @@ def process_features(layer_key, features):
         process_feature(layer_key, feature)
 
 
-def decode_pbf(mvt_file_path):
+def decode_pbf(pbf_data):
     """
-    Open the file at "mvt_file_path" read-only, decodes the PBF tile
-    as a layers dictionary.
+    Decodes the PBF tile as a layers dictionary.
     For instance decodes 12-1143-1497.vector.pbf, downloaded from:
     https://github.com/mapbox/vector-tile-js/tree/master/test/fixtures/
     Can also download some from:
     http://download.geofabrik.de/
     """
-    with open(mvt_file_path, 'r') as mvt_file:
-        pbf_data = mvt_file.read()
-        layers_dict = mapbox_vector_tile.decode(pbf_data)
+    layers_dict = mapbox_vector_tile.decode(pbf_data)
     return layers_dict
 
 
@@ -223,11 +220,11 @@ def argument_parser():
     return args
 
 
-def run(mvt_file_path):
+def run(mvt_content):
     """
-    Process the MVT file and return the generated SVG content.
+    Process the MVT content and return the generated SVG content.
     """
-    layers_dict = decode_pbf(mvt_file_path)
+    layers_dict = decode_pbf(mvt_content)
     process_layers(layers_dict)
     svg_image_file = NamedTemporaryFile(delete=False, suffix=".svg")
     svg_image_file.close()
@@ -246,8 +243,9 @@ def main():
     mvt2svg.py 6160.mvt > 6160.svg
     """
     args = argument_parser()
+    mvt_content = args.mvt_file.read()
     args.mvt_file.close()
-    svg_content = run(args.mvt_file.name)
+    svg_content = run(mvt_content)
     print(svg_content, end='')
 
 
