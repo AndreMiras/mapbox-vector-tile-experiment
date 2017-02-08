@@ -25,6 +25,20 @@ def argument_parser():
     return args
 
 
+def run(tile_x, tile_y, zoom, mbtiles_file):
+    """
+    Process the MBTile file and return the generated MVT content.
+    """
+    conn = sqlite3.connect(mbtiles_file)
+    c = conn.cursor()
+    c.execute(
+        ("SELECT tile_data FROM tiles WHERE "
+         "zoom_level=? AND tile_column=? AND tile_row=?"),
+        (zoom, tile_x, tile_y))
+    mvt_content = c.fetchone()[0]
+    return mvt_content
+
+
 def main():
     """
     Parses args and dumps MBTiles to MVT/PBF.
@@ -37,14 +51,8 @@ def main():
     zoom = args.zoom
     tile_x = args.tilex
     tile_y = args.tiley
-    conn = sqlite3.connect(mbtiles_file)
-    c = conn.cursor()
-    c.execute(
-        ("SELECT tile_data FROM tiles WHERE "
-         "zoom_level=? AND tile_column=? AND tile_row=?"),
-        (zoom, tile_x, tile_y))
-    one = c.fetchone()
-    print(one[0], end='')
+    mvt_content = run(tile_x, tile_y, zoom, mbtiles_file)
+    print(mvt_content, end='')
 
 
 if __name__ == "__main__":
