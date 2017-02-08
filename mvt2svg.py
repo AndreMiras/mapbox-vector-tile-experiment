@@ -204,7 +204,7 @@ def process_layer(layer_key, layer_value):
 
 
 def process_layers(layers_dict):
-    for layer_key, layer_value in layers_dict.iteritems():
+    for layer_key, layer_value in layers_dict.items():
         process_layer(layer_key, layer_value)
 
 
