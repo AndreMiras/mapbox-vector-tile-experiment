@@ -1,15 +1,26 @@
 # Mapbox Vector Tile Experiment
 This is highly experimental, do not try this at home.
-I'm playing with Mapbox Vector Tile and Python, see how it works etc... I'm trying to generate a SVG image from Mapbox pbf files.
+I'm playing with Mapbox Vector Tile and Python, see how it works etc... I'm trying to generate a SVG image from Mapbox Vector Tiles (.pbf/.mvt) files.
+If you have SQLite vector MBTiles, I'm also providing a script that queries the database and dumps to MVT given tile x, tile y and zoom level.
 
-I've downloaded [6160.mvt](http://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/14/4823/6160.mvt?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpbG10dnA3NzY3OTZ0dmtwejN2ZnUycjYifQ.1W5oTOnWXQ9R1w8u3Oo1yA) from the example given in https://www.mapbox.com/vector-tiles/ and I'm trying to render it purely in Python.
-
-## Demo
+## MVT/PBF to SVG
+I've downloaded [6160.mvt](http://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/14/4823/6160.mvt?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpbG10dnA3NzY3OTZ0dmtwejN2ZnUycjYifQ.1W5oTOnWXQ9R1w8u3Oo1yA) from the example given in https://www.mapbox.com/vector-tiles/.
+Now let's render it purely in Python.
 ```
 python mvt2svg.py 6160.mvt
 ```
 It will generate a [test.svg](http://imgh.us/test_259.svg) image out from the Mapbox Vector Tile file.
 
+## Vector MBTiles to MVT/PBF
+Having only a vector .mbtile file, it's possible to dump it as MVT/PBF given x, y and zoom level.
+```
+python mbtiles2mvt.py -x 0 -y 0 -z 0 planet_z0-z5.mbtiles > planet_x0y0z0.mvt.gz
+```
+It will dump the gzipped tile data, next thing is to extract it and use it with mvt2svg.py script.
+```
+zcat planet_x0y0z0.mvt.gz > planet_x0y0z0.mvt
+mvt2svg.py planet_x0y0z0.mvt
+```
 
 ## Troubleshooting
 ### libgeos_c.so
