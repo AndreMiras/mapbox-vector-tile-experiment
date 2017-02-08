@@ -19,7 +19,13 @@ python mbtiles2mvt.py -x 0 -y 0 -z 0 planet_z0-z5.mbtiles > planet_x0y0z0.mvt.gz
 It will dump the gzipped tile data, next thing is to extract it and use it with mvt2svg.py script.
 ```
 zcat planet_x0y0z0.mvt.gz > planet_x0y0z0.mvt
-mvt2svg.py planet_x0y0z0.mvt > planet_x0y0z0.svg
+python mvt2svg.py planet_x0y0z0.mvt > planet_x0y0z0.svg
+```
+
+## MBTiles to SVG directly
+It's also possible to use a wrapper script to generate a SVG directly from vector MBTiles file.
+```
+python mbtiles2svg.py -x 0 -y 0 -z 0 planet_z0-z5.mbtiles > planet_x0y0z0.svg
 ```
 
 ## Troubleshooting
