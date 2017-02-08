@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Extracts a SQLite MBTiles (with vector) file to a PBF file.
+Extracts a SQLite MBTiles (with vector) file to a MVT/PBF file.
 """
 from __future__ import print_function
 import argparse
@@ -27,9 +27,9 @@ def argument_parser():
 
 def main():
     """
-    Parses args and dumps MBTiles to PBF.
+    Parses args and dumps MBTiles to MVT/PBF.
     Usage example:
-    mbtiles2pbf.py -x 0 -y 0 -z 0 planet_z0-z5.mbtiles > planet_x0y0z0.pbf.gz
+    mbtiles2mvt.py -x 0 -y 0 -z 0 planet_z0-z5.mbtiles > planet_x0y0z0.mvt.gz
     """
     args = argument_parser()
     args.mbtiles_file.close()
