@@ -126,7 +126,7 @@ def convert2pixel(linestring):
 def process_linestring(linestring, prop_type):
     xy_pairs = convert2pixel(linestring)
     if not in_extent(linestring):
-        print("Not in extent")
+        # print("Not in extent")
         return
     clipping(xy_pairs)
     shrink(xy_pairs)
@@ -141,6 +141,9 @@ def process_polygon(polygon, prop_type):
 
 def is_multilinestring(geometry):
     return type(geometry[0][0]) == list
+
+def is_multipolygon(geometry):
+    return is_multilinestring(geometry)
 
 
 def process_feature(layer_type, feature):
@@ -163,11 +166,16 @@ def process_feature(layer_type, feature):
             linestring = LineString(geometry)
             process_linestring(linestring, prop_type)
     elif geometry_type == GeometryType.POLYGON:
-        for subgeometry in geometry:
-            polygon = Polygon(subgeometry)
-            process_polygon(polygon, prop_type)
+            for subgeometry in geometry:
+                if is_multipolygon(subgeometry):
+                    for subsubgeometry in subgeometry:
+                        polygon = Polygon(subsubgeometry)
+                        process_polygon(polygon, prop_type)
+                else:
+                    polygon = Polygon(subgeometry)
+                    process_polygon(polygon, prop_type)
     else:
-        print("Not supported geometry type:", geometry_type)
+        # print("Not supported geometry type:", geometry_type)
         pass
 
 
