@@ -217,7 +217,8 @@ def argument_parser():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "mvt_file", help="Mapbox Vector Tile file to load")
+        "mvt_file", help="Mapbox Vector Tile file to load",
+        type=argparse.FileType('r'))
     args = parser.parse_args()
     return args
 
@@ -245,7 +246,8 @@ def main():
     mvt2svg.py 6160.mvt > 6160.svg
     """
     args = argument_parser()
-    svg_content = run(args.mvt_file)
+    args.mvt_file.close()
+    svg_content = run(args.mvt_file.name)
     print(svg_content, end='')
 
 
