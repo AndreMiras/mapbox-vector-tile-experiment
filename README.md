@@ -9,7 +9,7 @@ Now let's render it purely in Python.
 ```
 python mvt2svg.py 6160.mvt > 6160.svg
 ```
-It will generate a [test.svg](http://imgh.us/test_259.svg) image out from the Mapbox Vector Tile file.
+It will generate a [6160.svg](http://imgh.us/test_259.svg) image out from the Mapbox Vector Tile file.
 
 ## Vector MBTiles to MVT/PBF
 Having only a vector .mbtile file, it's possible to dump it as MVT/PBF given x, y and zoom level.
