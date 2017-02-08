@@ -29,7 +29,7 @@ def main():
     """
     Parses args and dumps MBTiles to PBF.
     Usage example:
-    mbtiles2pbf.py -x 0 -y 0 -z 0 planet_z0-z5.mbtiles > planet_x0y0z0.pbf
+    mbtiles2pbf.py -x 0 -y 0 -z 0 planet_z0-z5.mbtiles > planet_x0y0z0.pbf.gz
     """
     args = argument_parser()
     args.mbtiles_file.close()
