@@ -27,7 +27,7 @@ def argument_parser():
 
 def run(tile_x, tile_y, zoom, mbtiles_file):
     """
-    Process the MBTile file and return the generated MVT content.
+    Processes the MBTile file and returns the generated SVG content.
     """
     conn = sqlite3.connect(mbtiles_file)
     c = conn.cursor()
