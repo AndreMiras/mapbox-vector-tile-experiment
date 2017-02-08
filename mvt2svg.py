@@ -142,6 +142,7 @@ def process_polygon(polygon, prop_type):
 def is_multilinestring(geometry):
     return type(geometry[0][0]) == list
 
+
 def is_multipolygon(geometry):
     return is_multilinestring(geometry)
 
@@ -200,6 +201,16 @@ def decode_pbf(mvt_file_path):
     return layers_dict
 
 
+def process_layer(layer_key, layer_value):
+    features = layer_value['features']
+    process_features(layer_key, features)
+
+
+def process_layers(layers_dict):
+    for layer_key, layer_value in layers_dict.iteritems():
+        process_layer(layer_key, layer_value)
+
+
 def argument_parser():
     """
     Argument parser helper.
@@ -211,33 +222,31 @@ def argument_parser():
     return args
 
 
-def process_layer(layer_key, layer_value):
-    features = layer_value['features']
-    process_features(layer_key, features)
-
-
-def process_layers(layers_dict):
-    for layer_key, layer_value in layers_dict.iteritems():
-        process_layer(layer_key, layer_value)
-
-
-def main():
+def run(mvt_file_path):
     """
-    Parses args and processes features.
-    Usage example:
-    mvt2svg.py 6160.mvt > 6160.svg
+    Process the MVT file and return the generated SVG content.
     """
-    args = argument_parser()
-    mvt_file_path = args.mvt_file
     layers_dict = decode_pbf(mvt_file_path)
     process_layers(layers_dict)
     svg_image_file = NamedTemporaryFile(delete=False, suffix=".svg")
     svg_image_file.close()
     fig.save(svg_image_file.name)
     svg_image_file = open(svg_image_file.name)
-    print(svg_image_file.read(), end='')
+    svg_content = svg_image_file.read()
     svg_image_file.close()
     os.unlink(svg_image_file.name)
+    return svg_content
+
+
+def main():
+    """
+    Parses args and prints SVG content.
+    Usage example:
+    mvt2svg.py 6160.mvt > 6160.svg
+    """
+    args = argument_parser()
+    svg_content = run(args.mvt_file)
+    print(svg_content, end='')
 
 
 if __name__ == "__main__":
