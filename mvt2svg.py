@@ -3,17 +3,18 @@
 Creates a SVG tile image from a Mapbox Vector Tile.
 """
 from __future__ import print_function
-import argparse
+import os
 import math
+import argparse
 import mapbox_vector_tile
 from enum import Enum
 from lxml import etree
+from tempfile import NamedTemporaryFile
 from django.contrib.gis.geos import LineString, Polygon
 from svgutils.transform import SVG, SVGFigure, FigureElement, LineElement
 # `mapbox-vector-tile` has a hardcoded tile extent of 4096 units.
 MVT_EXTENT = 4096
 TILE_SIZE = 256
-SVG_IMAGE_PATH = 'test.svg'
 fig = SVGFigure(width=TILE_SIZE, height=TILE_SIZE)
 
 
@@ -216,14 +217,19 @@ def main():
     """
     Parses args and processes features.
     Usage example:
-    mvt2svg.py 12-1143-1497.vector.pbf
+    mvt2svg.py 6160.mvt > 6160.svg
     """
     args = argument_parser()
     mvt_file_path = args.mvt_file
     layers_dict = decode_pbf(mvt_file_path)
     process_layers(layers_dict)
-    fig.save(SVG_IMAGE_PATH)
-    print("Image generated in: %s" % (SVG_IMAGE_PATH))
+    svg_image_file = NamedTemporaryFile(delete=False, suffix=".svg")
+    svg_image_file.close()
+    fig.save(svg_image_file.name)
+    svg_image_file = open(svg_image_file.name)
+    print(svg_image_file.read(), end='')
+    svg_image_file.close()
+    os.unlink(svg_image_file.name)
 
 
 if __name__ == "__main__":

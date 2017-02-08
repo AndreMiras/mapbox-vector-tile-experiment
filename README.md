@@ -7,7 +7,7 @@ If you have SQLite vector MBTiles, I'm also providing a script that queries the 
 I've downloaded [6160.mvt](http://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/14/4823/6160.mvt?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpbG10dnA3NzY3OTZ0dmtwejN2ZnUycjYifQ.1W5oTOnWXQ9R1w8u3Oo1yA) from the example given in https://www.mapbox.com/vector-tiles/.
 Now let's render it purely in Python.
 ```
-python mvt2svg.py 6160.mvt
+python mvt2svg.py 6160.mvt > 6160.svg
 ```
 It will generate a [test.svg](http://imgh.us/test_259.svg) image out from the Mapbox Vector Tile file.
 
@@ -19,7 +19,7 @@ python mbtiles2mvt.py -x 0 -y 0 -z 0 planet_z0-z5.mbtiles > planet_x0y0z0.mvt.gz
 It will dump the gzipped tile data, next thing is to extract it and use it with mvt2svg.py script.
 ```
 zcat planet_x0y0z0.mvt.gz > planet_x0y0z0.mvt
-mvt2svg.py planet_x0y0z0.mvt
+mvt2svg.py planet_x0y0z0.mvt > planet_x0y0z0.svg
 ```
 
 ## Troubleshooting
